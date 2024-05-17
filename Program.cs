@@ -48,39 +48,6 @@ class Program
     }
 
     /// <summary>
-    /// 正長方形のリストをクイックソートするメソッド
-    /// </summary>
-    /// <param name="data">並び替えたい正長方形が入ったリスト</param>
-    /// <returns>並び替えられた正長方形が入ったリスト</returns>
-    static List<Rect> SortRect(List<Rect> data)
-    {
-        if (data.Count <= 1)
-            return data;
-
-        Rect pivot = data[0];
-        data.RemoveAt(0);
-
-        List<Rect> left = new List<Rect>();
-        List<Rect> right = new List<Rect>();
-
-        foreach (Rect x in data)
-        {
-            if (CompareRect(x, pivot) < 0)
-                left.Add(x);
-            else
-                right.Add(x);
-        }
-
-        left = SortRect(left);
-        right = SortRect(right);
-
-        left.Add(pivot);
-        left.AddRange(right);
-
-        return left;
-    }
-
-    /// <summary>
     /// 一つ大きいサイズの正長方形を探し出力するメソッド
     /// </summary>
     /// <param name="lst">一つ大きいサイズを探したい正長方形のリスト</param>
@@ -95,27 +62,32 @@ class Program
             }
         }
 
+        var sortStopWatch = new System.Diagnostics.Stopwatch();
         Console.WriteLine("ソート開始");
-        List<Rect> sData = SortRect(data);
-        Console.WriteLine("ソート終了");
+        sortStopWatch.Start();
+        data.Sort(CompareRect);
+        sortStopWatch.Stop();
+        Console.WriteLine($"ソート終了  {sortStopWatch.ElapsedMilliseconds}ms");
 
+        var searchStopWatch = new System.Diagnostics.Stopwatch();
+        searchStopWatch.Start();
         string output = "";
 
         foreach (Rect x in lst)
         {
             int lower = 0;
-            int upper = sData.Count - 1;
+            int upper = data.Count - 1;
             while (true)
             {
                 int center = (upper - lower) / 2 + lower;
-                if (CompareRect(x, sData[center]) == 0)
+                if (CompareRect(x, data[center]) == 0)
                 {
-                    if (center == sData.Count - 1)
+                    if (center == data.Count - 1)
                         break;
-                    output += $"{sData[center + 1].Height} {sData[center + 1].Width}\n";
+                    output += $"{data[center + 1].Height} {data[center + 1].Width}\n";
                     break;
                 }
-                else if (CompareRect(x, sData[center]) < 0)
+                else if (CompareRect(x, data[center]) < 0)
                 {
                     upper = center - 1;
                 }
@@ -126,7 +98,8 @@ class Program
             }
         }
 
-        Console.WriteLine(output);
+        searchStopWatch.Stop();
+        Console.WriteLine(output + $"検索終了 {searchStopWatch.ElapsedMilliseconds}ms");
         File.WriteAllText("output.txt", output);
     }
 
