@@ -1,7 +1,14 @@
 # integerRectangle
 
-プログラム本体は「test4.py」
+プログラム本体
+
+Python版：「test4.py」
+
+C#版：「Program.cs」
+
+
 入力用txtファイルは「input.txt」
+
 
 # 内容
 高さ h と幅 w がともに整数である長方形を考えよう．そのような長方形を整長方形と呼ぶ
