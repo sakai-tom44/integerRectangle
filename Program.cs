@@ -1,0 +1,162 @@
+﻿
+/// <summary>
+/// 正長方形のクラス
+/// </summary>
+class Rect
+{
+    public int Width { get; set; } // 長方形の横幅
+    public int Height { get; set; } // 長方形の高さ
+    public int Distance { get; set; } // 長方形の対角線の長さ
+
+    public Rect(int height, int width)
+    {
+        Width = width;
+        Height = height;
+        Distance = width * width + height * height;
+    }
+
+    public override string ToString()
+    {
+        return $"縦:{Height} 横:{Width} 対角:{Distance}";
+    }
+}
+
+class Program
+{
+    /// <summary>
+    /// 正長方形を大きさの定義に従って比較するメソッド
+    /// </summary>
+    /// <param name="r1">比較する正長方形R1</param>
+    /// <param name="r2">比較する正長方形R2</param>
+    /// <returns>R1のほうが大きいときは正の値、R2のほうが大きいときは負の値、大きさが等しいときは0を返す</returns>
+    static int CompareRect(Rect r1, Rect r2)
+    {
+        int d = r1.Distance - r2.Distance;
+        if (d == 0)
+        {
+            if (r1.Height > r2.Height)
+                return 1;
+            else if (r1.Height < r2.Height)
+                return -1;
+            else
+                return 0;
+        }
+        else
+        {
+            return d;
+        }
+    }
+
+    /// <summary>
+    /// 正長方形のリストをクイックソートするメソッド
+    /// </summary>
+    /// <param name="data">並び替えたい正長方形が入ったリスト</param>
+    /// <returns>並び替えられた正長方形が入ったリスト</returns>
+    static List<Rect> SortRect(List<Rect> data)
+    {
+        if (data.Count <= 1)
+            return data;
+
+        Rect pivot = data[0];
+        data.RemoveAt(0);
+
+        List<Rect> left = new List<Rect>();
+        List<Rect> right = new List<Rect>();
+
+        foreach (Rect x in data)
+        {
+            if (CompareRect(x, pivot) < 0)
+                left.Add(x);
+            else
+                right.Add(x);
+        }
+
+        left = SortRect(left);
+        right = SortRect(right);
+
+        left.Add(pivot);
+        left.AddRange(right);
+
+        return left;
+    }
+
+    /// <summary>
+    /// 一つ大きいサイズの正長方形を探し出力するメソッド
+    /// </summary>
+    /// <param name="lst">一つ大きいサイズを探したい正長方形のリスト</param>
+    static void FindNextRectangle(List<Rect> lst)
+    {
+        List<Rect> data = new List<Rect>();
+        for (int w1 = 2; w1 <= 150; w1++)
+        {
+            for (int h1 = 1; h1 < w1; h1++)
+            {
+                data.Add(new Rect(h1, w1));
+            }
+        }
+
+        Console.WriteLine("ソート開始");
+        List<Rect> sData = SortRect(data);
+        Console.WriteLine("ソート終了");
+
+        string output = "";
+
+        foreach (Rect x in lst)
+        {
+            int lower = 0;
+            int upper = sData.Count - 1;
+            while (true)
+            {
+                int center = (upper - lower) / 2 + lower;
+                if (CompareRect(x, sData[center]) == 0)
+                {
+                    if (center == sData.Count - 1)
+                        break;
+                    output += $"{sData[center + 1].Height} {sData[center + 1].Width}\n";
+                    break;
+                }
+                else if (CompareRect(x, sData[center]) < 0)
+                {
+                    upper = center - 1;
+                }
+                else
+                {
+                    lower = center + 1;
+                }
+            }
+        }
+
+        Console.WriteLine(output);
+        File.WriteAllText("output.txt", output);
+    }
+
+    /// <summary>
+    /// テキストデータから正長方形クラスのリストとして読み込むメソッド。(読み込み先は"input.txt")
+    /// </summary>
+    /// <returns>読み込んだ正長方形のリスト</returns>
+    static List<Rect> ReadTxt()
+    {
+        List<Rect> data = new List<Rect>();
+        using (StreamReader sr = new StreamReader("input.txt"))
+        {
+            string line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] s = line.Split(" ");
+                int h = int.Parse(s[0]);
+                int w = int.Parse(s[1]);
+                if (h == 0 && w == 0)
+                    break;
+                data.Add(new Rect(h, w));
+            }
+
+        }
+        return data;
+    }
+
+    static void Main(string[] args)
+    {
+        List<Rect> lst = ReadTxt();
+        FindNextRectangle(lst);
+    }
+}
